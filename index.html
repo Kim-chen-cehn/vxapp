@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Python 练习</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #eef3f8;
+    --surface: #ffffff;
+    --surface-soft: #f7f9fc;
+    --text: #182230;
+    --muted: #667085;
+    --line: #d9e2ec;
+    --primary: #1677ff;
+    --primary-dark: #0f5fd1;
+    --success: #12b76a;
+    --warning: #f79009;
+    --code-bg: #101828;
+    --code-line: #243044;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  button, input, textarea {
+    font: inherit;
+  }
+
+  button {
+    border: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .app {
+    width: min(100%, 430px);
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--surface-soft);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 30px rgba(15, 23, 42, .08);
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: max(14px, env(safe-area-inset-top)) 16px 12px;
+    background: rgba(255, 255, 255, .94);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(217, 226, 236, .8);
+  }
+
+  .nav-row {
+    height: 34px;
+    display: grid;
+    grid-template-columns: 36px 1fr 36px;
+    align-items: center;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #edf4ff;
+    color: var(--primary);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .title {
+    text-align: center;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .subhead {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .content {
+    flex: 1;
+    padding: 14px 14px 96px;
+  }
+
+  .quick-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .file-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 12px 28px rgba(16, 24, 40, .06);
+  }
+
+  .file-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .file-input {
+    min-width: 0;
+    height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0 10px;
+    outline: 0;
+    background: var(--surface-soft);
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .file-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, .12);
+  }
+
+  .mini-btn {
+    height: 40px;
+    min-width: 54px;
+    border-radius: 8px;
+    background: #edf4ff;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 750;
+    padding: 0 10px;
+    white-space: nowrap;
+  }
+
+  .mini-btn.primary {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .mini-btn.danger {
+    background: #fff1f3;
+    color: #c01048;
+  }
+
+  .file-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 0 0;
+    scrollbar-width: none;
+  }
+
+  .file-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .file-chip {
+    height: 32px;
+    max-width: 170px;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    padding: 0 11px;
+    font-size: 12px;
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-chip.active {
+    background: #e8f7ef;
+    border-color: #abefc6;
+    color: #087443;
+  }
+
+  .quick-btn {
+    min-height: 42px;
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--line);
+    font-size: 13px;
+    font-weight: 650;
+    box-shadow: 0 6px 16px rgba(16, 24, 40, .04);
+  }
+
+  .quick-btn:active {
+    transform: translateY(1px);
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(16, 24, 40, .06);
+  }
+
+  .panel + .panel {
+    margin-top: 12px;
+  }
+
+  .panel-head {
+    min-height: 44px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .panel-title {
+    font-size: 15px;
+    font-weight: 750;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #e8f7ef;
+    color: #087443;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  #editor {
+    background: var(--code-bg);
+  }
+
+  .cm-editor {
+    height: 360px;
+    background: var(--code-bg);
+    color: #f2f4f7;
+  }
+
+  .cm-editor.cm-focused {
+    outline: none;
+  }
+
+  .cm-scroller {
+    font-family: ui-monospace, "SF Mono", Consolas, Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .cm-gutters {
+    background: #0b1220 !important;
+    color: #98a2b3 !important;
+    border-right: 1px solid var(--code-line) !important;
+  }
+
+  textarea {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    resize: vertical;
+    color: var(--text);
+    background: var(--surface);
+    padding: 12px;
+    line-height: 1.55;
+  }
+
+  #editor textarea {
+    min-height: 360px;
+    background: var(--code-bg);
+    color: #f2f4f7;
+    font-family: ui-monospace, "SF Mono", Consolas, Menlo, monospace;
+  }
+
+  #stdin {
+    min-height: 74px;
+  }
+
+  .output {
+    min-height: 120px;
+    margin: 0;
+    padding: 12px;
+    background: #0f172a;
+    color: #e6edf7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: ui-monospace, "SF Mono", Consolas, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .result-meta {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: right;
+  }
+
+  .bottom-action {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: min(100%, 430px);
+    padding: 12px 14px max(14px, env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, .94);
+    backdrop-filter: blur(18px);
+    border-top: 1px solid rgba(217, 226, 236, .9);
+    display: grid;
+    grid-template-columns: 108px 1fr;
+    gap: 10px;
+  }
+
+  .run-btn {
+    width: 100%;
+    height: 50px;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 800;
+    box-shadow: 0 12px 24px rgba(22, 119, 255, .26);
+  }
+
+  .save-btn {
+    height: 50px;
+    border-radius: 8px;
+    background: #e8f7ef;
+    color: #087443;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .save-btn:disabled {
+    opacity: .6;
+    cursor: default;
+  }
+
+  .run-btn:active {
+    background: var(--primary-dark);
+  }
+
+  .run-btn:disabled {
+    opacity: .68;
+    cursor: default;
+    box-shadow: none;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, .45);
+    border-top-color: #fff;
+    display: none;
+    animation: spin .8s linear infinite;
+  }
+
+  .run-btn.is-loading .spinner {
+    display: inline-block;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (min-width: 700px) {
+    body {
+      padding: 24px 0;
+    }
+
+    .app {
+      min-height: calc(100vh - 48px);
+      border-radius: 28px;
+      overflow: hidden;
+    }
+
+    .bottom-action {
+      border-radius: 0 0 28px 28px;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="nav-row">
+        <button class="icon-btn" type="button" aria-label="返回">‹</button>
+        <div class="title">Python 练习</div>
+        <button class="icon-btn" type="button" aria-label="更多">⋯</button>
+      </div>
+      <p class="subhead">本地调试版 · 代码会提交到后端沙箱运行</p>
+    </header>
+
+    <section class="content">
+      <section class="file-card" aria-label="文件操作">
+        <div class="file-row">
+          <input class="file-input" id="filename" value="练习1.py" aria-label="文件名" placeholder="文件名.py">
+          <button class="mini-btn" id="newFile" type="button">新建</button>
+          <button class="mini-btn primary" id="topSave" type="button">保存</button>
+          <button class="mini-btn danger" id="deleteFile" type="button">删除</button>
+        </div>
+        <div class="file-list" id="fileList" aria-label="已保存文件"></div>
+      </section>
+
+      <div class="quick-row" aria-label="示例代码">
+        <button class="quick-btn" type="button" data-example="hello">入门</button>
+        <button class="quick-btn" type="button" data-example="loop">循环</button>
+        <button class="quick-btn" type="button" data-example="list">列表</button>
+      </div>
+
+      <section class="panel" aria-labelledby="code-title">
+        <div class="panel-head">
+          <div class="panel-title" id="code-title">代码编辑器</div>
+          <span class="badge">Python 3</span>
+        </div>
+        <div id="editor"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="stdin-title">
+        <div class="panel-head">
+          <div class="panel-title" id="stdin-title">输入</div>
+          <span class="result-meta">传给 input()</span>
+        </div>
+        <textarea id="stdin" placeholder="每一行会按顺序传给 input()">world</textarea>
+      </section>
+
+      <section class="panel" aria-labelledby="output-title">
+        <div class="panel-head">
+          <div class="panel-title" id="output-title">运行结果</div>
+          <span class="result-meta" id="status">等待运行</span>
+        </div>
+        <pre class="output" id="output">点击底部按钮查看输出</pre>
+      </section>
+    </section>
+
+    <footer class="bottom-action">
+      <button class="save-btn" id="save" type="button">保存</button>
+      <button class="run-btn" id="run" type="button">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="runText">运行代码</span>
+      </button>
+    </footer>
+  </main>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+
+const examples = {
+  hello:
+`name = input()
+print(f"hello, {name}")
+print("1~10 的和 =", sum(range(1, 11)))`,
+  loop:
+`n = int(input())
+total = 0
+for i in range(1, n + 1):
+    total += i
+print(total)`,
+  list:
+`scores = [88, 92, 75, 100, 84]
+print("最高分:", max(scores))
+print("平均分:", sum(scores) / len(scores))`,
+};
+
+const blankCode = `# 新文件
+print("hello, python")`;
+
+let currentFilename = $("filename").value.trim();
+let getCode = () => examples.hello;
+let setCode = () => {};
+
+const normalizeFilename = (value) => {
+  const name = value.trim();
+  if (!name) return "";
+  return name.endsWith(".py") ? name : `${name}.py`;
+};
+
+const setMessage = (message) => {
+  $("status").textContent = message;
+};
+
+const setOutputHint = (message = "点击底部按钮查看输出") => {
+  $("output").textContent = message;
+};
+
+async function readJson(res) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || `HTTP ${res.status}`);
+  }
+  return data;
+}
+
+async function loadFileList() {
+  const list = $("fileList");
+  try {
+    const files = await fetch("/api/files").then(readJson);
+    list.innerHTML = "";
+    if (!files.length) {
+      const empty = document.createElement("span");
+      empty.className = "result-meta";
+      empty.textContent = "还没有保存的文件";
+      list.appendChild(empty);
+      return;
+    }
+    files.forEach((file) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "file-chip";
+      if (file.filename === currentFilename) btn.classList.add("active");
+      btn.textContent = file.filename;
+      btn.title = file.filename;
+      btn.addEventListener("click", () => openFile(file.filename));
+      list.appendChild(btn);
+    });
+  } catch (e) {
+    list.innerHTML = "";
+    const warn = document.createElement("span");
+    warn.className = "result-meta";
+    warn.textContent = "启动后端后可加载文件";
+    list.appendChild(warn);
+  }
+}
+
+async function openFile(filename) {
+  setMessage("打开中...");
+  try {
+    const file = await fetch(`/api/files/${encodeURIComponent(filename)}`).then(readJson);
+    currentFilename = file.filename;
+    $("filename").value = file.filename;
+    setCode(file.code);
+    setOutputHint(`${file.filename} 已打开`);
+    setMessage("已打开");
+    await loadFileList();
+  } catch (e) {
+    setMessage("打开失败");
+    setOutputHint(`打开失败: ${e.message}`);
+  }
+}
+
+async function saveCode() {
+  const filename = normalizeFilename($("filename").value);
+  if (!filename) {
+    setMessage("请输入文件名");
+    return;
+  }
+
+  $("save").disabled = true;
+  $("topSave").disabled = true;
+  setMessage("保存中...");
+  try {
+    const file = await fetch("/api/files", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename, code: getCode() }),
+    }).then(readJson);
+    currentFilename = file.filename;
+    $("filename").value = file.filename;
+    setMessage("已保存");
+    setOutputHint(`${file.filename} 已保存到本地 files 目录`);
+    await loadFileList();
+  } catch (e) {
+    setMessage("保存失败");
+    setOutputHint(`保存失败: ${e.message}`);
+  } finally {
+    $("save").disabled = false;
+    $("topSave").disabled = false;
+  }
+}
+
+function draftFilename() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const stamp = `${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}`;
+  return `练习${stamp}.py`;
+}
+
+function newFile() {
+  currentFilename = draftFilename();
+  $("filename").value = currentFilename;
+  $("stdin").value = "";
+  setCode(blankCode);
+  setMessage("新文件");
+  setOutputHint("新文件已创建,保存后会写入本地");
+  loadFileList();
+}
+
+async function deleteCurrentFile() {
+  const filename = normalizeFilename($("filename").value);
+  if (!filename) {
+    setMessage("请输入文件名");
+    return;
+  }
+  if (!window.confirm(`确认删除 ${filename} 吗?`)) {
+    return;
+  }
+
+  $("deleteFile").disabled = true;
+  setMessage("删除中...");
+  try {
+    await fetch(`/api/files/${encodeURIComponent(filename)}`, {
+      method: "DELETE",
+    }).then(readJson);
+    currentFilename = draftFilename();
+    $("filename").value = currentFilename;
+    $("stdin").value = "";
+    setCode(blankCode);
+    setMessage("已删除");
+    setOutputHint(`${filename} 已删除,已创建新的未保存草稿`);
+    await loadFileList();
+  } catch (e) {
+    setMessage("删除失败");
+    setOutputHint(`删除失败: ${e.message}`);
+  } finally {
+    $("deleteFile").disabled = false;
+  }
+}
+
+try {
+  const [{ EditorView, basicSetup }, { python }] = await Promise.all([
+    import("https://esm.sh/codemirror@6.0.1"),
+    import("https://esm.sh/@codemirror/lang-python@6.1.6"),
+  ]);
+
+  const view = new EditorView({
+    doc: examples.hello,
+    extensions: [basicSetup, python()],
+    parent: $("editor"),
+  });
+  getCode = () => view.state.doc.toString();
+  setCode = (code) => {
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: code },
+    });
+    view.focus();
+  };
+} catch (e) {
+  console.warn("CodeMirror 加载失败,已回退到普通文本框:", e);
+  const ta = document.createElement("textarea");
+  ta.value = examples.hello;
+  $("editor").appendChild(ta);
+  getCode = () => ta.value;
+  setCode = (code) => {
+    ta.value = code;
+    ta.focus();
+  };
+}
+
+document.querySelectorAll("[data-example]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const key = btn.dataset.example;
+    setCode(examples[key] || examples.hello);
+    if (key === "loop") $("stdin").value = "10";
+    if (key === "hello") $("stdin").value = "world";
+    if (key === "list") $("stdin").value = "";
+    setMessage("已切换示例");
+    setOutputHint();
+  });
+});
+
+$("newFile").addEventListener("click", newFile);
+$("save").addEventListener("click", saveCode);
+$("topSave").addEventListener("click", saveCode);
+$("deleteFile").addEventListener("click", deleteCurrentFile);
+
+$("run").addEventListener("click", async () => {
+  const btn = $("run");
+  btn.disabled = true;
+  btn.classList.add("is-loading");
+  $("runText").textContent = "运行中";
+  setMessage("提交中...");
+  $("output").textContent = "";
+
+  try {
+    const res = await fetch("/api/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: getCode(), stdin: $("stdin").value }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      $("output").textContent = "请求出错: " + (data.detail || res.status);
+      setMessage("运行失败");
+      return;
+    }
+
+    let out = "";
+    if (data.stdout) out += data.stdout;
+    if (data.stderr) out += "\n[stderr]\n" + data.stderr;
+    if (data.compile_output) out += "\n[错误信息]\n" + data.compile_output;
+    $("output").textContent = out.trim() || "无输出";
+    $("status").textContent =
+      `${data.status} · ${data.time ?? "?"}s · ${data.memory ?? "?"}KB`;
+  } catch (e) {
+    $("output").textContent = "网络错误: " + e.message;
+    setMessage("连接失败");
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("is-loading");
+    $("runText").textContent = "运行代码";
+  }
+});
+
+loadFileList();
+</script>
+</body>
+</html>
